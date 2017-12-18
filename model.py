@@ -10,14 +10,22 @@ class BowModel(nn.Module):
         n_embedding, dim = emb_tensor.size()
         self.embedding = nn.Embedding(n_embedding, dim, padding_idx=0)
         self.embedding.weight = Parameter(emb_tensor, requires_grad=False)
-        self.out = nn.Linear(dim, 2)
+        self.dropout = nn.Dropout(0.2)
+        self.lin1 = nn.Linear(dim, 200) # from dimention dim to dim 200
+        self.lin2 = nn.Linear(200, 50) # from dimention 200 to dim 50
+        self.lin3 = nn.Linear(50, 2) # from dimention 50 to dim 2
 
     def forward(self, input):
         '''
-        input is a [batch_size, sentence_length] tensor with a list of token IDs
+        input is a [batch_size(1 here), sentence_length] tensor with a list of token IDs
         '''
-        embedded = self.embedding(input)
+        embedded = self.embedding(input) # Size [1, sentence_lenght, dim] (input is a tensor)
+        embedded = self.dropout(embedded)
         # Here we take into account only the first word of the sentence
         # You should change it, e.g. by taking the average of the words of the sentence
-        bow = embedded[:, 0]
-        return F.log_softmax(self.out(bow))
+        bow = embedded.mean(dim=1)
+
+        x = F.relu(self.lin1(bow));
+        x = self.lin2(x);
+        x = self.lin3(x);
+        return F.log_softmax(x) #self.out is the second layer(the first beeing the embeding)

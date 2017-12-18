@@ -74,7 +74,7 @@ def test_epoch(epoch):
     return accuracy
 
 
-for epoch in range(0, 50):
+for epoch in range(0, 1):
     logging.info('Starting epoch {}'.format(epoch))
     train_epoch()
     accuracy = test_epoch(epoch)
